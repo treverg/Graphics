@@ -8,7 +8,7 @@ var near = 0.3;
 var far = 10.0;
 var radius = 4.0;		// Used to establish eye point
 var theta = 0.0;		// Used to establish eye point
-var phi = 0.0;		// Used to establish eye point
+var phi = 0.0;		    // Used to establish eye point
 var rotation_by_5_deg = 5.0 * Math.PI / 180.0;
 
 var fovy = 45.0;  // Field-of-view in Y direction angle (in degrees)
@@ -87,7 +87,7 @@ window.onload = function init() {
 
     var vBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
-    //    gl.bufferData( gl.ARRAY_BUFFER, flatten(pointsArray1), gl.STATIC_DRAW );
+    // gl.bufferData( gl.ARRAY_BUFFER, flatten(pointsArray1), gl.STATIC_DRAW );
     gl.bufferData(gl.ARRAY_BUFFER, flatten(pointsArray1.concat(buckyBall)), gl.STATIC_DRAW);
 
     var vPosition = gl.getAttribLocation(program, "vPosition");
@@ -116,7 +116,7 @@ var render = function () {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     eye = vec3(radius * Math.sin(theta) * Math.cos(phi),
-        radius * Math.sin(theta) * Math.sin(phi), radius * Math.cos(theta));
+            radius * Math.sin(theta) * Math.sin(phi), radius * Math.cos(theta));
 
     // Object 1
     modelViewMatrix = lookAt(eye, at, up);
@@ -127,9 +127,10 @@ var render = function () {
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(modelViewMatrix));
     gl.uniformMatrix4fv(projectionMatrixLoc, false, flatten(projectionMatrix));
 
+    // Moebius Band colors
     gl.uniform4fv(gl.getUniformLocation(program, "fColor"),
-        flatten(vec4(1.0, 0.0, 0.0, 1.0)));
-    gl.drawArrays(gl.TRIANGLES, 0, numVerticesObj1);
+        flatten(vec4(0.0, 1.0, 0.0, 1.0)));
+    gl.drawArrays(gl.LINE_LOOP, 0, numVerticesObj1);
 
 
     // The BuckyBall
@@ -141,9 +142,10 @@ var render = function () {
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(modelViewMatrix));
     gl.uniformMatrix4fv(projectionMatrixLoc, false, flatten(projectionMatrix));
 
+    // Buckyball colors
     gl.uniform4fv(gl.getUniformLocation(program, "fColor"),
-        flatten(vec4(0.0, .0, 1.0, 1.0)));
-    gl.drawArrays(gl.TRIANGLES, numVerticesObj1, buckyBall.length);
+        flatten(vec4(0.0, 1.0, 1.0, 1.0)));
+    gl.drawArrays(gl.LINE_LOOP, numVerticesObj1, buckyBall.length);
 
     requestAnimFrame(render);
 };
