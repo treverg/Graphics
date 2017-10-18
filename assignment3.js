@@ -20,50 +20,44 @@ var eye;			// Established by radius, theta, phi as we move
 const at = vec3(0.0, 0.0, 0.0);
 const up = vec3(0.0, 1.0, 0.0);
 
-////////////////// Object 1 vertex information //////////////////  
-
-// numVerticesObj1, pointsArray1, vertices1, coordsForObj1 are all
-// used to generate the vertex information for "Object 1".  In the
-// assignment, you are required to make this object a more interesting
-// mathematically defined object such as the sombrero surface or
-// Moebius band
-
-var numVerticesObj1 = 36;	// For the 12 triangles
+var numVerticesObj1 = 2500;	// For the morbis band
 
 var pointsArray1 = [];
 
-var vertices1 = [
-    vec4(-0.5, -0.5, 1.5, 1.0),
-    vec4(-0.5, 0.5, 1.5, 1.0),
-    vec4(0.5, 0.5, 1.5, 1.0),
-    vec4(0.5, -0.5, 1.5, 1.0),
-    vec4(-0.5, -0.5, 0.5, 1.0),
-    vec4(-0.5, 0.5, 0.5, 1.0),
-    vec4(0.5, 0.5, 0.5, 1.0),
-    vec4(0.5, -0.5, 0.5, 1.0)
-];
-
-function coordsForObj1() {
-    function quad(a, b, c, d) {
-        pointsArray1.push(vertices1[a]);
-        pointsArray1.push(vertices1[b]);
-        pointsArray1.push(vertices1[c]);
-        pointsArray1.push(vertices1[a]);
-        pointsArray1.push(vertices1[c]);
-        pointsArray1.push(vertices1[d]);
-    };
-
-    quad(1, 0, 3, 2);
-    quad(2, 3, 7, 6);
-    quad(3, 0, 4, 7);
-    quad(6, 5, 1, 2);
-    quad(4, 5, 6, 7);
-    quad(5, 4, 0, 1);
-}
-
-///////// End of vertex information for Object 1  ////////
+var nRows = 25;
+var nColumns = 25;
+// data for the parametric surface
+var datax = [];
+var datay = [];
+var dataz = [];
 
 window.onload = function init() {
+    // Moebius band
+
+    for (var i = 0; i <= nRows; ++i) {
+        datax.push([]);
+        datay.push([]);
+        dataz.push([]);
+        var u = 2.0 * Math.PI * (i / nRows);
+
+        for (var j = 0; j <= nColumns; ++j) {
+            var v = -0.3 + ((j / nColumns) * 0.6);
+            datax[i].push(Math.cos(u) + v * Math.sin(u / 2.0) * Math.cos(u));
+            datay[i].push(Math.sin(u) + v * Math.sin(u / 2.0) * Math.sin(u));
+            dataz[i].push(v * Math.cos(u / 2.0));
+        }
+    }
+
+    for (var i = 0; i < nRows; i++) {
+        for (var j = 0; j < nColumns; j++) {
+            pointsArray1.push(vec4(datax[i][j], datay[i][j], dataz[i][j], 1.0));
+            pointsArray1.push(vec4(datax[i + 1][j], datay[i + 1][j], dataz[i + 1][j], 1.0));
+            pointsArray1.push(vec4(datax[i + 1][j + 1], datay[i + 1][j + 1], dataz[i + 1][j + 1], 1.0));
+            pointsArray1.push(vec4(datax[i][j + 1], datay[i][j + 1], dataz[i][j + 1], 1.0));
+        }
+    }
+    console.log(pointsArray1.length);
+    ///////// End of vertex information for Object 1  ////////
 
     canvas = document.getElementById("gl-canvas");
 
@@ -83,11 +77,11 @@ window.onload = function init() {
     program = initShaders(gl, "vertex-shader", "fragment-shader");
     gl.useProgram(program);
 
-    coordsForObj1();		// This will probably change once you finalize Object 1
+    //coordsForObj1();		// This will probably change once you finalize Object 1
 
     var vBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
-    // gl.bufferData( gl.ARRAY_BUFFER, flatten(pointsArray1), gl.STATIC_DRAW );
+    //    gl.bufferData( gl.ARRAY_BUFFER, flatten(pointsArray1), gl.STATIC_DRAW );
     gl.bufferData(gl.ARRAY_BUFFER, flatten(pointsArray1.concat(buckyBall)), gl.STATIC_DRAW);
 
     var vPosition = gl.getAttribLocation(program, "vPosition");
@@ -116,7 +110,7 @@ var render = function () {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     eye = vec3(radius * Math.sin(theta) * Math.cos(phi),
-            radius * Math.sin(theta) * Math.sin(phi), radius * Math.cos(theta));
+        radius * Math.sin(theta) * Math.sin(phi), radius * Math.cos(theta));
 
     // Object 1
     modelViewMatrix = lookAt(eye, at, up);
