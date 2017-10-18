@@ -8,7 +8,7 @@ var near = 0.3;
 var far = 10.0;
 var radius = 4.0;		// Used to establish eye point
 var theta = 0.0;		// Used to establish eye point
-var phi = 0.0;		// Used to establish eye point
+var phi = 0.0;		    // Used to establish eye point
 var rotation_by_5_deg = 5.0 * Math.PI / 180.0;
 
 var fovy = 45.0;  // Field-of-view in Y direction angle (in degrees)
@@ -119,9 +119,10 @@ for (var i = 0; i < nRows; i++) {
         gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(modelViewMatrix));
         gl.uniformMatrix4fv(projectionMatrixLoc, false, flatten(projectionMatrix));
 
-        gl.uniform4fv(gl.getUniformLocation(program, "fColor"),
-            flatten(vec4(1.0, 0.0, 0.0, 1.0)));
-        gl.drawArrays(gl.TRIANGLES, 0, numVerticesObj1);
+    // Moebius Band colors
+    gl.uniform4fv(gl.getUniformLocation(program, "fColor"),
+        flatten(vec4(0.0, 1.0, 0.0, 1.0)));
+    gl.drawArrays(gl.LINE_LOOP, 0, numVerticesObj1);
 
 
         // The BuckyBall
@@ -133,9 +134,10 @@ for (var i = 0; i < nRows; i++) {
         gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(modelViewMatrix));
         gl.uniformMatrix4fv(projectionMatrixLoc, false, flatten(projectionMatrix));
 
-        gl.uniform4fv(gl.getUniformLocation(program, "fColor"),
-            flatten(vec4(0.0, .0, 1.0, 1.0)));
-        gl.drawArrays(gl.TRIANGLES, numVerticesObj1, buckyBall.length);
+    // Buckyball colors
+    gl.uniform4fv(gl.getUniformLocation(program, "fColor"),
+        flatten(vec4(0.0, 1.0, 1.0, 1.0)));
+    gl.drawArrays(gl.LINE_LOOP, numVerticesObj1, buckyBall.length);
 
         requestAnimFrame(render);
     };
