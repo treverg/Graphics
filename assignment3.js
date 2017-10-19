@@ -31,6 +31,12 @@ var datax = [];
 var datay = [];
 var dataz = [];
 
+var buckyBallX = 1.75;
+var buckyBallY = 0.0;
+var buckyBallZ = 0.0;
+var buckyBallScale = .03;
+var buckyBallYGoingToPi = true;
+
 window.onload = function init() {
     // Moebius band
 
@@ -77,11 +83,8 @@ window.onload = function init() {
     program = initShaders(gl, "vertex-shader", "fragment-shader");
     gl.useProgram(program);
 
-    //coordsForObj1();		// This will probably change once you finalize Object 1
-
     var vBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
-    //    gl.bufferData( gl.ARRAY_BUFFER, flatten(pointsArray1), gl.STATIC_DRAW );
     gl.bufferData(gl.ARRAY_BUFFER, flatten(pointsArray1.concat(buckyBall)), gl.STATIC_DRAW);
 
     var vPosition = gl.getAttribLocation(program, "vPosition");
@@ -114,7 +117,7 @@ var render = function () {
 
     // Object 1
     modelViewMatrix = lookAt(eye, at, up);
-    modelViewMatrix = mult(modelViewMatrix, translate(-1.5, 0.0, 0.0));
+    modelViewMatrix = mult(modelViewMatrix, translate(-1.5, 0, 0));
     modelViewMatrix = mult(modelViewMatrix, scalem(0.5, 0.5, 0.5));
     projectionMatrix = perspective(fovy, aspect, near, far);
 
@@ -129,8 +132,42 @@ var render = function () {
 
     // The BuckyBall
     modelViewMatrix = lookAt(eye, at, up);
-    modelViewMatrix = mult(modelViewMatrix, translate(1.75, 0.0, 0.0));
-    modelViewMatrix = mult(modelViewMatrix, scalem(0.03, 0.03, 0.03));
+    var bounceAdjustment = .035;
+    if (buckyBallYGoingToPi) {
+        buckyBallY = buckyBallY + bounceAdjustment;
+        if (buckyBallY > Math.PI / 2) {
+            buckyBallYGoingToPi = false;
+        }
+    }
+    else {
+        buckyBallY = buckyBallY - bounceAdjustment;
+        if (buckyBallY < 0) {
+            buckyBallYGoingToPi = true;
+        }
+    }
+
+    if (buckyBallX < -.3) {
+        if (buckyBallX < -1.4) {
+            buckyBallScale = buckyBallScale * .93;
+        }
+        else {
+            buckyBallScale = buckyBallScale * .98;
+        } 
+    }
+
+    if (buckyBallX > -1.7) {
+        buckyBallX = buckyBallX - .01;
+    }
+    else {
+        buckyBallX = 1.75;
+        buckyBallY = 0;
+        buckyBallZ = 0;
+        buckyBallScale = .03;
+    }
+
+    modelViewMatrix = mult(modelViewMatrix, translate(buckyBallX, Math.cos(buckyBallY) - (buckyBallY/2), buckyBallZ));
+
+    modelViewMatrix = mult(modelViewMatrix, scalem(buckyBallScale, buckyBallScale, buckyBallScale));
     projectionMatrix = perspective(fovy, aspect, near, far);
 
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(modelViewMatrix));
