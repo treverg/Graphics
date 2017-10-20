@@ -84,8 +84,6 @@ window.onload = function init() {
     program = initShaders(gl, "vertex-shader", "fragment-shader");
     gl.useProgram(program);
 
-    //coordsForObj1();		// This will probably change once you finalize Object 1
-
     var vBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
     //gl.bufferData( gl.ARRAY_BUFFER, flatten(pointsArray1), gl.STATIC_DRAW );
@@ -121,7 +119,7 @@ var render = function () {
 
     // Moebius Band
     modelViewMatrix = lookAt(eye, at, up);
-    modelViewMatrix = mult(modelViewMatrix, translate(-1.5, 0.0, 0.0));
+    modelViewMatrix = mult(modelViewMatrix, translate(-1.5, 0, 0));
     modelViewMatrix = mult(modelViewMatrix, scalem(0.5, 0.5, 0.5));
     projectionMatrix = perspective(fovy, aspect, near, far);
 
