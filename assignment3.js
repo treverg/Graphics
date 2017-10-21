@@ -184,12 +184,14 @@ var render = function () {
     // BuckyBall colors
     var hexEndIndex = 240;
 
+    // shades the hexagons red and the pentagons blue
     gl.uniform4fv(gl.getUniformLocation(program, "fColor"), flatten(vec4(1.0, 0.0, 0.0, 1.0)));
     gl.drawArrays(gl.TRIANGLES, numVerticesMoebiusBand, hexEndIndex);
     gl.uniform4fv(gl.getUniformLocation(program, "fColor"), flatten(vec4(0.0, 0.0, 1.0, 1.0)));
     gl.drawArrays(gl.TRIANGLES, numVerticesMoebiusBand + hexEndIndex, buckyBall.length - hexEndIndex);
 
-    for (var i = numVerticesMoebiusBand; i < hexEndIndex; i += 12) {
+    // outlines all of the hexagons in white (not working yet)
+    for (var i = numVerticesMoebiusBand; i < numVerticesMoebiusBand + hexEndIndex; i += 12) {
         gl.uniform4fv(gl.getUniformLocation(program, "fColor"), flatten(vec4(1.0, 1.0, 1.0, 1.0)));
         gl.drawArrays(gl.LINE_LOOP, i, 1);
         gl.uniform4fv(gl.getUniformLocation(program, "fColor"), flatten(vec4(1.0, 1.0, 1.0, 1.0)));
@@ -204,7 +206,8 @@ var render = function () {
         gl.drawArrays(gl.LINE_LOOP, i + 10, 1);
     }
 
-    for (var i = numVerticesMoebiusBand + hexEndIndex; i < buckyBall.length; i += 9) {
+    // outlines all of the pentagons in white (not working yet)
+    for (var i = numVerticesMoebiusBand + hexEndIndex; i < numVerticesMoebiusBand + hexEndIndex + buckyBall.length; i += 9) {
         gl.uniform4fv(gl.getUniformLocation(program, "fColor"), flatten(vec4(1.0, 1.0, 1.0, 1.0)));
         gl.drawArrays(gl.LINE_LOOP, i, 1);
         gl.uniform4fv(gl.getUniformLocation(program, "fColor"), flatten(vec4(1.0, 1.0, 1.0, 1.0)));
