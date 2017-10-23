@@ -87,7 +87,9 @@ window.onload = function init() {
     var vBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
     //gl.bufferData( gl.ARRAY_BUFFER, flatten(pointsArray1), gl.STATIC_DRAW );
-    gl.bufferData(gl.ARRAY_BUFFER, flatten(pointsArray1.concat(buckyBall)), gl.STATIC_DRAW);
+    // ***concat an array with all unique vertices from buckyBall onto pointsArray1***
+    var array = [];
+    gl.bufferData(gl.ARRAY_BUFFER, flatten(pointsArray1.concat(array)), gl.STATIC_DRAW);
 
     var vPosition = gl.getAttribLocation(program, "vPosition");
     gl.vertexAttribPointer(vPosition, 4, gl.FLOAT, false, 0, 0);
@@ -184,6 +186,7 @@ var render = function () {
     // BuckyBall colors
     var hexEndIndex = 240;
 
+    // ***once outlines array is set up, use gl.TRIANGLE_FAN instead of gl.TRIANGLES to create buckyBall***
     // shades the hexagons red and the pentagons blue
     gl.uniform4fv(gl.getUniformLocation(program, "fColor"), flatten(vec4(1.0, 0.0, 0.0, 1.0)));
     gl.drawArrays(gl.TRIANGLES, numVerticesMoebiusBand, hexEndIndex);
