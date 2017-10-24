@@ -63,7 +63,6 @@ window.onload = function init() {
             pointsArray1.push(vec4(datax[i][j + 1], datay[i][j + 1], dataz[i][j + 1], 1.0));
         }
     }
-    //console.log(pointsArray1.length);
     ///////// End of vertex information for Moebius Band  ////////
 
     canvas = document.getElementById("gl-canvas");
@@ -77,10 +76,7 @@ window.onload = function init() {
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.enable(gl.DEPTH_TEST);
 
-
-    //
     //  Load shaders and initialize attribute buffers
-    //
     program = initShaders(gl, "vertex-shader", "fragment-shader");
     gl.useProgram(program);
 
@@ -112,34 +108,7 @@ window.onload = function init() {
     render();
 };
 
-
-var render = function () {
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-    eye = vec3(radius * Math.sin(theta) * Math.cos(phi),
-        radius * Math.sin(theta) * Math.sin(phi), radius * Math.cos(theta));
-
-    // Moebius Band
-    modelViewMatrix = lookAt(eye, at, up);
-    modelViewMatrix = mult(modelViewMatrix, translate(-1.5, 0, 0));
-    modelViewMatrix = mult(modelViewMatrix, scalem(0.5, 0.5, 0.5));
-    projectionMatrix = perspective(fovy, aspect, near, far);
-
-    gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(modelViewMatrix));
-    gl.uniformMatrix4fv(projectionMatrixLoc, false, flatten(projectionMatrix));
-
-    // Moebius Band colors
-    //gl.uniform4fv(gl.getUniformLocation(program, "fColor"),
-    //    flatten(vec4(0.0, 1.0, 0.0, 1.0)));
-    //gl.drawArrays(gl.LINE_LOOP, 0, 36);
-
-    for (var i = 0; i < pointsArray1.length; i += 4) {
-        gl.uniform4fv(gl.getUniformLocation(program, "fColor"), flatten(vec4(0.0, 1.0, 0.0, 1.0)));
-        gl.drawArrays(gl.TRIANGLE_FAN, i, 4);
-        gl.uniform4fv(gl.getUniformLocation(program, "fColor"), flatten(vec4(1.0, 0.0, 1.0, 1.0)));
-        gl.drawArrays(gl.LINE_LOOP, i, 4);
-    }
-
+var computeBuckyBallCordnates = function () {
     // The BuckyBall
     modelViewMatrix = lookAt(eye, at, up);
     var bounceAdjustment = .035;
@@ -174,6 +143,36 @@ var render = function () {
         buckyBallZ = 0;
         buckyBallScale = .03;
     }
+}
+
+var render = function () {
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    eye = vec3(radius * Math.sin(theta) * Math.cos(phi),
+        radius * Math.sin(theta) * Math.sin(phi), radius * Math.cos(theta));
+
+    // Moebius Band
+    modelViewMatrix = lookAt(eye, at, up);
+    modelViewMatrix = mult(modelViewMatrix, translate(-1.5, 0, 0));
+    modelViewMatrix = mult(modelViewMatrix, scalem(0.5, 0.5, 0.5));
+    projectionMatrix = perspective(fovy, aspect, near, far);
+
+    gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(modelViewMatrix));
+    gl.uniformMatrix4fv(projectionMatrixLoc, false, flatten(projectionMatrix));
+
+    // Moebius Band colors
+    //gl.uniform4fv(gl.getUniformLocation(program, "fColor"),
+    //    flatten(vec4(0.0, 1.0, 0.0, 1.0)));
+    //gl.drawArrays(gl.LINE_LOOP, 0, 36);
+
+    for (var i = 0; i < pointsArray1.length; i += 4) {
+        gl.uniform4fv(gl.getUniformLocation(program, "fColor"), flatten(vec4(0.0, 1.0, 0.0, 1.0)));
+        gl.drawArrays(gl.TRIANGLE_FAN, i, 4);
+        gl.uniform4fv(gl.getUniformLocation(program, "fColor"), flatten(vec4(1.0, 0.0, 1.0, 1.0)));
+        gl.drawArrays(gl.LINE_LOOP, i, 4);
+    }
+
+    computeBuckyBallCordnates();
 
     modelViewMatrix = mult(modelViewMatrix, translate(buckyBallX, Math.cos(buckyBallY) - (buckyBallY / 2), buckyBallZ));
 
