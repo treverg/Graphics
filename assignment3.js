@@ -20,8 +20,6 @@ var eye;			// Established by radius, theta, phi as we move
 const at = vec3(0.0, 0.0, 0.0);
 const up = vec3(0.0, 1.0, 0.0);
 
-var numVerticesMoebiusBand = 2500;	// For the Moebius Band
-
 var pointsArray1 = [];
 var array = [];
 
@@ -88,25 +86,23 @@ window.onload = function init() {
 
     var vBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
-    //gl.bufferData( gl.ARRAY_BUFFER, flatten(pointsArray1), gl.STATIC_DRAW );
-    // ***concat an array with all unique vertices from buckyBall onto pointsArray1***
+
     for (var i = 0; i < hexEndIndex; i += 12) {
         array.push(buckyBall[i]);
         array.push(buckyBall[i + 1]);
         array.push(buckyBall[i + 2]);
-        array.push(buckyBall[i + 5]);
-        array.push(buckyBall[i + 8]);
         array.push(buckyBall[i + 10]);
+        array.push(buckyBall[i + 8]);
+        array.push(buckyBall[i + 5]);
     }
     for (var i = hexEndIndex; i < buckyBall.length; i += 9) {
         array.push(buckyBall[i]);
-        array.push(buckyBall[1 + 1]);
+        array.push(buckyBall[i + 1]);
         array.push(buckyBall[i + 2]);
-        array.push(buckyBall[i + 5]);
         array.push(buckyBall[i + 7]);
+        array.push(buckyBall[i + 5]);
     }
-    console.log(array.length); // should be 180
-    gl.bufferData(gl.ARRAY_BUFFER, flatten(pointsArray1.concat(buckyBall).concat(array)), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, flatten(pointsArray1.concat(array)), gl.STATIC_DRAW);
 
     var vPosition = gl.getAttribLocation(program, "vPosition");
     gl.vertexAttribPointer(vPosition, 4, gl.FLOAT, false, 0, 0);
@@ -164,7 +160,7 @@ var computeBuckyBallCordnates = function () {
         buckyBallZ = 0;
         buckyBallScale = .03;
     }
-}
+};
 
 var render = function () {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -181,7 +177,7 @@ var render = function () {
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(modelViewMatrix));
     gl.uniformMatrix4fv(projectionMatrixLoc, false, flatten(projectionMatrix));
 
-    // Moebius Band colors
+    // random colors for Meobius Band and Bucky Ball when toggled
     if (random) {
         var random1 = Math.random();
         var random2 = Math.random();
@@ -197,14 +193,15 @@ var render = function () {
         var random5 = 0.0;
         var random6 = 1.0;
     }
+
     for (var i = 0; i < pointsArray1.length; i += 4) {
         gl.uniform4fv(gl.getUniformLocation(program, "fColor"), flatten(vec4(random1, random2, random3, 1.0)));
         gl.drawArrays(gl.TRIANGLE_FAN, i, 4);
         gl.uniform4fv(gl.getUniformLocation(program, "fColor"), flatten(vec4(random4, random5, random6, 1.0)));
         gl.drawArrays(gl.LINE_LOOP, i, 4);
     }
+
     computeBuckyBallCordnates();
-    //buckyBallScale = .1;
 
     modelViewMatrix = mult(modelViewMatrix, translate(buckyBallX, Math.cos(buckyBallY) - (buckyBallY / 2), buckyBallZ));
 
@@ -214,25 +211,23 @@ var render = function () {
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(modelViewMatrix));
     gl.uniformMatrix4fv(projectionMatrixLoc, false, flatten(projectionMatrix));
 
-    // BuckyBall colors
-    var uniqueHexagons = 120;
-    var uniquePentagons = 60;
+    // Bucky Ball
+    var numVerticesMoebiusBand = pointsArray1.length;
+    var numVerticesHexagons = 120;
+    var numVerticesPentagons = 60;
 
-    // ***once outlines array is set up, use gl.TRIANGLE_FAN instead of gl.TRIANGLES to create buckyBall***
-    // shades the hexagons red and the pentagons blue
-    gl.uniform4fv(gl.getUniformLocation(program, "fColor"), flatten(vec4(random1, random2, random3, 1.0)));
-    gl.drawArrays(gl.TRIANGLES, numVerticesMoebiusBand, hexEndIndex);
-    gl.uniform4fv(gl.getUniformLocation(program, "fColor"), flatten(vec4(random4, random5, random6, 1.0)));
-    gl.drawArrays(gl.TRIANGLES, numVerticesMoebiusBand + hexEndIndex, buckyBall.length - hexEndIndex);
-
-    // outlines all of the hexagons in white (not working yet)
-    for (var i = numVerticesMoebiusBand + buckyBall.length; i < numVerticesMoebiusBand + buckyBall.length + uniqueHexagons; i += 6) {
+    // shades the hexagons in red and outlines them in white
+    for (var i = numVerticesMoebiusBand; i < numVerticesMoebiusBand + numVerticesHexagons; i += 6) {
+        gl.uniform4fv(gl.getUniformLocation(program, "fColor"), flatten(vec4(random1, random2, random3, 1.0)));
+        gl.drawArrays(gl.TRIANGLE_FAN, i, 6);
         gl.uniform4fv(gl.getUniformLocation(program, "fColor"), flatten(vec4(1.0, 1.0, 1.0, 1.0)));
         gl.drawArrays(gl.LINE_LOOP, i, 6);
     }
 
-    // outlines all of the pentagons in white (not working yet)
-    for (var i = numVerticesMoebiusBand + buckyBall.length + uniqueHexagons; i < numVerticesMoebiusBand + buckyBall.length + uniqueHexagons + uniquePentagons; i += 5) {
+    // shades the pentagons in blue and outlines them in white
+    for (var i = numVerticesMoebiusBand + numVerticesHexagons; i < numVerticesMoebiusBand + numVerticesHexagons + numVerticesPentagons; i += 5) {
+        gl.uniform4fv(gl.getUniformLocation(program, "fColor"), flatten(vec4(random4, random5, random6, 1.0)));
+        gl.drawArrays(gl.TRIANGLE_FAN, i, 5);
         gl.uniform4fv(gl.getUniformLocation(program, "fColor"), flatten(vec4(1.0, 1.0, 1.0, 1.0)));
         gl.drawArrays(gl.LINE_LOOP, i, 5);
     }
