@@ -23,6 +23,12 @@ const up = vec3(0.0, 1.0, 0.0);
 var numVerticesMoebiusBand = 2500;	// For the Moebius Band
 
 var pointsArray1 = [];
+var array = [];
+
+var hexEndIndex = 240;
+
+var disappearing = false;
+var random = false;
 
 var nRows = 25;
 var nColumns = 25;
@@ -84,8 +90,23 @@ window.onload = function init() {
     gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
     //gl.bufferData( gl.ARRAY_BUFFER, flatten(pointsArray1), gl.STATIC_DRAW );
     // ***concat an array with all unique vertices from buckyBall onto pointsArray1***
-    var array = [];
-    gl.bufferData(gl.ARRAY_BUFFER, flatten(pointsArray1.concat(array)), gl.STATIC_DRAW);
+    for (var i = 0; i < hexEndIndex; i += 12) {
+        array.push(buckyBall[i]);
+        array.push(buckyBall[i + 1]);
+        array.push(buckyBall[i + 2]);
+        array.push(buckyBall[i + 5]);
+        array.push(buckyBall[i + 8]);
+        array.push(buckyBall[i + 10]);
+    }
+    for (var i = hexEndIndex; i < buckyBall.length; i += 9) {
+        array.push(buckyBall[i]);
+        array.push(buckyBall[1 + 1]);
+        array.push(buckyBall[i + 2]);
+        array.push(buckyBall[i + 5]);
+        array.push(buckyBall[i + 7]);
+    }
+    console.log(array.length); // should be 180
+    gl.bufferData(gl.ARRAY_BUFFER, flatten(pointsArray1.concat(buckyBall).concat(array)), gl.STATIC_DRAW);
 
     var vPosition = gl.getAttribLocation(program, "vPosition");
     gl.vertexAttribPointer(vPosition, 4, gl.FLOAT, false, 0, 0);
@@ -124,16 +145,16 @@ var computeBuckyBallCordnates = function () {
             buckyBallYGoingToPi = true;
         }
     }
-
-    if (buckyBallX < -.3) {
-        if (buckyBallX < -1.4) {
-            buckyBallScale = buckyBallScale * .93;
-        }
-        else {
-            buckyBallScale = buckyBallScale * .98;
+    if (disappearing) {
+        if (buckyBallX < -.3) {
+            if (buckyBallX < -1.4) {
+                buckyBallScale = buckyBallScale * .93;
+            }
+            else {
+                buckyBallScale = buckyBallScale * .98;
+            }
         }
     }
-
     if (buckyBallX > -1.7) {
         buckyBallX = buckyBallX - .01;
     }
@@ -161,18 +182,29 @@ var render = function () {
     gl.uniformMatrix4fv(projectionMatrixLoc, false, flatten(projectionMatrix));
 
     // Moebius Band colors
-    //gl.uniform4fv(gl.getUniformLocation(program, "fColor"),
-    //    flatten(vec4(0.0, 1.0, 0.0, 1.0)));
-    //gl.drawArrays(gl.LINE_LOOP, 0, 36);
-
+    if (random) {
+        var random1 = Math.random();
+        var random2 = Math.random();
+        var random3 = Math.random();
+        var random4 = Math.random();
+        var random5 = Math.random();
+        var random6 = Math.random();
+    } else {
+        var random1 = 1.0;
+        var random2 = 0.0;
+        var random3 = 0.0;
+        var random4 = 0.0;
+        var random5 = 0.0;
+        var random6 = 1.0;
+    }
     for (var i = 0; i < pointsArray1.length; i += 4) {
-        gl.uniform4fv(gl.getUniformLocation(program, "fColor"), flatten(vec4(0.0, 1.0, 0.0, 1.0)));
+        gl.uniform4fv(gl.getUniformLocation(program, "fColor"), flatten(vec4(random1, random2, random3, 1.0)));
         gl.drawArrays(gl.TRIANGLE_FAN, i, 4);
-        gl.uniform4fv(gl.getUniformLocation(program, "fColor"), flatten(vec4(1.0, 0.0, 1.0, 1.0)));
+        gl.uniform4fv(gl.getUniformLocation(program, "fColor"), flatten(vec4(random4, random5, random6, 1.0)));
         gl.drawArrays(gl.LINE_LOOP, i, 4);
     }
-
     computeBuckyBallCordnates();
+    //buckyBallScale = .1;
 
     modelViewMatrix = mult(modelViewMatrix, translate(buckyBallX, Math.cos(buckyBallY) - (buckyBallY / 2), buckyBallZ));
 
@@ -183,44 +215,54 @@ var render = function () {
     gl.uniformMatrix4fv(projectionMatrixLoc, false, flatten(projectionMatrix));
 
     // BuckyBall colors
-    var hexEndIndex = 240;
+    var uniqueHexagons = 120;
+    var uniquePentagons = 60;
 
     // ***once outlines array is set up, use gl.TRIANGLE_FAN instead of gl.TRIANGLES to create buckyBall***
     // shades the hexagons red and the pentagons blue
-    gl.uniform4fv(gl.getUniformLocation(program, "fColor"), flatten(vec4(1.0, 0.0, 0.0, 1.0)));
+    gl.uniform4fv(gl.getUniformLocation(program, "fColor"), flatten(vec4(random1, random2, random3, 1.0)));
     gl.drawArrays(gl.TRIANGLES, numVerticesMoebiusBand, hexEndIndex);
-    gl.uniform4fv(gl.getUniformLocation(program, "fColor"), flatten(vec4(0.0, 0.0, 1.0, 1.0)));
+    gl.uniform4fv(gl.getUniformLocation(program, "fColor"), flatten(vec4(random4, random5, random6, 1.0)));
     gl.drawArrays(gl.TRIANGLES, numVerticesMoebiusBand + hexEndIndex, buckyBall.length - hexEndIndex);
 
     // outlines all of the hexagons in white (not working yet)
-    for (var i = numVerticesMoebiusBand; i < numVerticesMoebiusBand + hexEndIndex; i += 12) {
+    for (var i = numVerticesMoebiusBand + buckyBall.length; i < numVerticesMoebiusBand + buckyBall.length + uniqueHexagons; i += 6) {
         gl.uniform4fv(gl.getUniformLocation(program, "fColor"), flatten(vec4(1.0, 1.0, 1.0, 1.0)));
-        gl.drawArrays(gl.LINE_LOOP, i, 1);
-        gl.uniform4fv(gl.getUniformLocation(program, "fColor"), flatten(vec4(1.0, 1.0, 1.0, 1.0)));
-        gl.drawArrays(gl.LINE_LOOP, i + 1, 1);
-        gl.uniform4fv(gl.getUniformLocation(program, "fColor"), flatten(vec4(1.0, 1.0, 1.0, 1.0)));
-        gl.drawArrays(gl.LINE_LOOP, i + 2, 1);
-        gl.uniform4fv(gl.getUniformLocation(program, "fColor"), flatten(vec4(1.0, 1.0, 1.0, 1.0)));
-        gl.drawArrays(gl.LINE_LOOP, i + 5, 1);
-        gl.uniform4fv(gl.getUniformLocation(program, "fColor"), flatten(vec4(1.0, 1.0, 1.0, 1.0)));
-        gl.drawArrays(gl.LINE_LOOP, i + 8, 1);
-        gl.uniform4fv(gl.getUniformLocation(program, "fColor"), flatten(vec4(1.0, 1.0, 1.0, 1.0)));
-        gl.drawArrays(gl.LINE_LOOP, i + 10, 1);
+        gl.drawArrays(gl.LINE_LOOP, i, 6);
     }
 
     // outlines all of the pentagons in white (not working yet)
-    for (var i = numVerticesMoebiusBand + hexEndIndex; i < numVerticesMoebiusBand + hexEndIndex + buckyBall.length; i += 9) {
+    for (var i = numVerticesMoebiusBand + buckyBall.length + uniqueHexagons; i < numVerticesMoebiusBand + buckyBall.length + uniqueHexagons + uniquePentagons; i += 5) {
         gl.uniform4fv(gl.getUniformLocation(program, "fColor"), flatten(vec4(1.0, 1.0, 1.0, 1.0)));
-        gl.drawArrays(gl.LINE_LOOP, i, 1);
-        gl.uniform4fv(gl.getUniformLocation(program, "fColor"), flatten(vec4(1.0, 1.0, 1.0, 1.0)));
-        gl.drawArrays(gl.LINE_LOOP, i + 1, 1);
-        gl.uniform4fv(gl.getUniformLocation(program, "fColor"), flatten(vec4(1.0, 1.0, 1.0, 1.0)));
-        gl.drawArrays(gl.LINE_LOOP, i + 2, 1);
-        gl.uniform4fv(gl.getUniformLocation(program, "fColor"), flatten(vec4(1.0, 1.0, 1.0, 1.0)));
-        gl.drawArrays(gl.LINE_LOOP, i + 5, 1);
-        gl.uniform4fv(gl.getUniformLocation(program, "fColor"), flatten(vec4(1.0, 1.0, 1.0, 1.0)));
-        gl.drawArrays(gl.LINE_LOOP, i + 7, 1);
+        gl.drawArrays(gl.LINE_LOOP, i, 5);
     }
 
     requestAnimFrame(render);
+};
+
+// Key listener
+window.onkeydown = function (event) {
+    var key = String.fromCharCode(event.keyCode);
+    // For letters, the upper-case version of the letter is always
+    // returned because the shift-key is regarded as a separate key in
+    // itself.  Hence upper-case and lower-case can't be distinguished.
+    switch (key) {
+        case 'D':
+            if (disappearing) {
+                disappearing = false;
+                document.getElementById('disappearing').innerHTML = "NOT DISAPPEARING";
+            } else {
+                disappearing = true;
+                document.getElementById('disappearing').innerHTML = "DISAPPEARING";
+            }
+            break;
+
+        case 'R':
+            if (random) {
+                random = false;
+            } else {
+                random = true;
+            }
+            break;
+    }
 };
